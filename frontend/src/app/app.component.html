@@ -1,0 +1,20 @@
+<div class="page">
+  <div class="shell">
+    <nav class="tabs">
+      <button class="tab" [class.active]="view() === 'translate'" (click)="setView('translate')">
+        Traduzir
+      </button>
+      <button class="tab" [class.active]="view() === 'settings'" (click)="setView('settings')">
+        Configurações
+      </button>
+    </nav>
+
+    <div class="card">
+      @if (view() === 'translate') {
+        <app-translate />
+      } @else {
+        <app-settings />
+      }
+    </div>
+  </div>
+</div>

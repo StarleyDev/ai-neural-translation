@@ -1,0 +1,52 @@
+<div class="panel">
+  <span class="eyebrow">AI · Neural Translation</span>
+  <h1>Tradução de Legendas</h1>
+  <p class="subtitle">Envie um arquivo .srt e receba a tradução para o idioma desejado.</p>
+
+  <label class="field">
+    <span>Arquivo .srt</span>
+    <input type="file" accept=".srt" (change)="onFileSelected($event)" />
+  </label>
+
+  <label class="field">
+    <span>Idioma de destino</span>
+    <select [(ngModel)]="targetLanguage">
+      <option value="pt-br">Português (Brasil)</option>
+      <option value="en">Inglês</option>
+      <option value="es">Espanhol</option>
+    </select>
+  </label>
+
+  <button (click)="translate()" [disabled]="status() === 'uploading' || status() === 'translating'">
+    {{ status() === 'uploading' || status() === 'translating' ? 'Traduzindo...' : 'Traduzir' }}
+  </button>
+
+  @if (status() === 'translating' || status() === 'uploading') {
+    <div class="progress">
+      <div class="progress-bar" [style.width.%]="progressPercent()"></div>
+    </div>
+    <p class="hint">
+      @if (totalBatches() > 0) {
+        Lote {{ currentBatch() }} de {{ totalBatches() }} — {{ progressPercent() }}%
+      } @else {
+        Preparando tradução...
+      }
+    </p>
+
+    @if (status() === 'translating') {
+      <button class="cancel" (click)="cancel()">Cancelar tradução</button>
+    }
+  }
+
+  @if (status() === 'cancelled') {
+    <p class="hint">Tradução cancelada.</p>
+  }
+
+  @if (status() === 'error') {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (status() === 'done' && downloadUrl()) {
+    <a class="download" [href]="downloadUrl()" [download]="downloadName()">Baixar {{ downloadName() }}</a>
+  }
+</div>

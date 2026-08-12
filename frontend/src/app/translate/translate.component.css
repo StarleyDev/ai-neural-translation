@@ -1,0 +1,198 @@
+.panel {
+  width: 100%;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  margin-bottom: 10px;
+  font-family: 'Courier New', monospace;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #ffffff, var(--neon-cyan) 60%, var(--neon-violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 0 0 28px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-size: 13px;
+}
+
+.field span {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+}
+
+input[type='file'],
+select {
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+input[type='file']::file-selector-button {
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--neon-cyan);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-right: 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+select option {
+  background: var(--bg-1);
+  color: var(--text-primary);
+}
+
+input[type='file']:focus,
+select:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 9px;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-violet));
+  color: #06070d;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: filter 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.4);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.cancel {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid rgba(251, 113, 133, 0.35);
+  border-radius: 9px;
+  background: rgba(251, 113, 133, 0.08);
+  color: #fb7185;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.cancel:hover {
+  background: rgba(251, 113, 133, 0.16);
+  box-shadow: 0 0 16px rgba(251, 113, 133, 0.2);
+}
+
+.progress {
+  margin-top: 18px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-violet), var(--neon-pink));
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+  transition: width 0.3s ease;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 10px;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+}
+
+.error {
+  color: #fb7185;
+  font-size: 13px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(251, 113, 133, 0.08);
+  border: 1px solid rgba(251, 113, 133, 0.25);
+}
+
+.download {
+  display: block;
+  text-align: center;
+  margin-top: 18px;
+  padding: 13px;
+  border-radius: 9px;
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.download:hover {
+  background: rgba(34, 211, 238, 0.16);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
+}
