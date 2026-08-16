@@ -18,6 +18,7 @@ COPY package.json package-lock.json ./
 RUN npm install --omit=dev
 
 COPY src ./src
+COPY README.md ./README.md
 COPY --from=frontend-build /app/frontend/dist/ia-translate-frontend/browser ./public
 
 ENV NODE_ENV=production
