@@ -44,7 +44,8 @@ export class SettingsComponent implements OnInit {
         this.selectedModel.set(data.model);
         this.promptDraft = data.promptTemplate;
       },
-      error: () => this.error.set('Não foi possível carregar as configurações.'),
+      error: (err) =>
+        this.error.set(err.error?.error || 'Não foi possível carregar as configurações.'),
     });
   }
 

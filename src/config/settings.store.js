@@ -15,14 +15,30 @@ function maskKey(key)
     return `${key.slice(0, 6)}••••${key.slice(-4)}`;
 }
 
+function defaultSettings()
+{
+    return { provider: "anthropic", model: PROVIDERS.anthropic.defaultModel, apiKeys: {}, promptTemplate: null };
+}
+
 function readRaw()
 {
     if (!fs.existsSync(SETTINGS_PATH))
     {
-        return { provider: "anthropic", model: PROVIDERS.anthropic.defaultModel, apiKeys: {}, promptTemplate: null };
+        return defaultSettings();
     }
+
     const content = fs.readFileSync(SETTINGS_PATH, "utf-8");
-    return JSON.parse(content);
+    let parsed;
+    try
+    {
+        parsed = content.trim() ? JSON.parse(content) : {};
+    }
+    catch
+    {
+        parsed = {};
+    }
+
+    return { ...defaultSettings(), ...parsed, apiKeys: { ...parsed.apiKeys } };
 }
 
 function writeRaw(data)
