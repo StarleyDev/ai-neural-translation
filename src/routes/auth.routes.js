@@ -6,14 +6,18 @@ const sessionStore = require("../services/session.store");
 const { requireAuth, parseCookies } = require("../middleware/auth.middleware");
 
 const router = express.Router();
-const isProd = process.env.NODE_ENV === "production";
 const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
-function setSessionCookie(res, token)
+function isHttps(req)
+{
+    return req.secure || req.headers["x-forwarded-proto"] === "https";
+}
+
+function setSessionCookie(req, res, token)
 {
     res.setHeader(
         "Set-Cookie",
-        `session=${token}; HttpOnly; Path=/; Max-Age=${SESSION_MAX_AGE_SECONDS}; SameSite=Lax${isProd ? "; Secure" : ""}`
+        `session=${token}; HttpOnly; Path=/; Max-Age=${SESSION_MAX_AGE_SECONDS}; SameSite=Lax${isHttps(req) ? "; Secure" : ""}`
     );
 }
 
@@ -34,7 +38,7 @@ router.post("/login", (req, res) =>
         return res.status(401).json({ error: "Usuário ou senha inválidos." });
     }
     const token = sessionStore.create(username);
-    setSessionCookie(res, token);
+    setSessionCookie(req, res, token);
     res.json({ username });
 });
 
