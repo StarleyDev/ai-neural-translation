@@ -1,45 +1,62 @@
 <div class="page">
   <div class="shell">
-    <div class="header">
-      <nav class="tabs">
-        <button class="tab" [class.active]="view() === 'translate'" (click)="setView('translate')">
-          {{ i18n.t('nav.translate') }}
-        </button>
-        <button class="tab" [class.active]="view() === 'settings'" (click)="setView('settings')">
-          {{ i18n.t('nav.settings') }}
-        </button>
-      </nav>
-
-      <div class="lang-switch">
-        <button
-          class="lang-flag"
-          [class.active]="i18n.lang() === 'pt'"
-          (click)="setLang('pt')"
-          title="Português"
-          aria-label="Português"
-        >
-          🇧🇷
-        </button>
-        <button
-          class="lang-flag"
-          [class.active]="i18n.lang() === 'en'"
-          (click)="setLang('en')"
-          title="English"
-          aria-label="English"
-        >
-          🇺🇸
-        </button>
-      </div>
-    </div>
-
-    <div class="card">
-      @if (view() === 'translate') {
-        <app-translate />
-      } @else if (view() === 'settings') {
-        <app-settings (openDocs)="setView('docs')" />
+    @if (!checkingSession()) {
+      @if (!auth.user()) {
+        <div class="card">
+          <app-login (loggedIn)="setView('translate')" />
+        </div>
       } @else {
-        <app-docs (back)="setView('settings')" />
+        <div class="header">
+          <nav class="tabs">
+            <button class="tab" [class.active]="view() === 'translate'" (click)="setView('translate')">
+              {{ i18n.t('nav.translate') }}
+            </button>
+            <button class="tab" [class.active]="view() === 'settings'" (click)="setView('settings')">
+              {{ i18n.t('nav.settings') }}
+            </button>
+            <button class="tab" [class.active]="view() === 'account'" (click)="setView('account')">
+              {{ i18n.t('nav.account') }}
+            </button>
+          </nav>
+
+          <div class="lang-switch">
+            <button
+              class="lang-flag"
+              [class.active]="i18n.lang() === 'pt'"
+              (click)="setLang('pt')"
+              title="Português"
+              aria-label="Português"
+            >
+              🇧🇷
+            </button>
+            <button
+              class="lang-flag"
+              [class.active]="i18n.lang() === 'en'"
+              (click)="setLang('en')"
+              title="English"
+              aria-label="English"
+            >
+              🇺🇸
+            </button>
+          </div>
+
+          <button class="logout-button" type="button" (click)="logout()" [title]="i18n.t('nav.logout')">
+            ⏻
+          </button>
+        </div>
+
+        <div class="card">
+          @if (view() === 'translate') {
+            <app-translate />
+          } @else if (view() === 'settings') {
+            <app-settings (openDocs)="setView('docs')" />
+          } @else if (view() === 'account') {
+            <app-account />
+          } @else {
+            <app-docs (back)="setView('settings')" />
+          }
+        </div>
       }
-    </div>
+    }
   </div>
 </div>

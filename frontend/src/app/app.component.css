@@ -100,6 +100,26 @@
     box-shadow: 0 0 16px rgba(34, 211, 238, 0.15);
 }
 
+.logout-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.logout-button:hover {
+    color: #fb7185;
+    border-color: rgba(251, 113, 133, 0.4);
+    box-shadow: 0 0 16px rgba(251, 113, 133, 0.15);
+}
+
 .card {
     position: relative;
     background: var(--panel);

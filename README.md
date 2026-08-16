@@ -20,6 +20,7 @@ Envie uma legenda em outro idioma, escolha o provedor de IA e receba o `.srt` tr
 - 📝 **Prompt editável** — personalize o texto enviado à IA na tela de Configurações, com um padrão definido no `.env`
 - 🌐 **Interface multilíngue** — troque entre 🇧🇷 português e 🇺🇸 inglês pelas bandeiras no header
 - 🌓 **Interface dark/futurista** em Angular, standalone components, sem dependências pesadas
+- 🔐 **Login obrigatório** — cookie de sessão `HttpOnly`, com tela **Conta** para trocar usuário e senha sem perder a sessão
 
 ---
 
@@ -31,13 +32,18 @@ ia-translate/
 │   ├── app.js                    # Entry point
 │   ├── config/
 │   │   ├── providers.js          # Catálogo de provedores e modelos suportados
-│   │   └── settings.store.js     # Persistência de configurações (data/settings.json)
+│   │   ├── settings.store.js     # Persistência de configurações (data/settings.json)
+│   │   └── auth.store.js         # Usuário/senha (hash+salt) em data/auth.json
+│   ├── middleware/
+│   │   └── auth.middleware.js    # requireAuth — valida o cookie de sessão
 │   ├── routes/
 │   │   ├── subtitle.routes.js    # Upload, progresso (SSE) e download
-│   │   └── settings.routes.js    # GET/PUT de configurações
+│   │   ├── settings.routes.js    # GET/PUT de configurações
+│   │   └── auth.routes.js        # Login/logout, troca de usuário/senha
 │   ├── services/
 │   │   ├── translator.service.js # Orquestra tradução em lotes
 │   │   ├── job-store.js          # Jobs assíncronos em memória
+│   │   ├── session.store.js      # Sessões de login em memória (token -> usuário)
 │   │   └── providers/            # Implementações por provedor (Anthropic/OpenAI/Google)
 │   └── utils/srt-parser.js       # Parse e serialização de .srt
 │
@@ -45,8 +51,11 @@ ia-translate/
     └── src/app/
         ├── translate/            # Tela de tradução + barra de progresso + cancelamento
         ├── settings/             # Tela de configuração de provedor/modelo/chave/prompt
+        ├── login/                # Tela de login
+        ├── account/              # Tela de conta (trocar usuário/senha)
         └── services/
             ├── settings.service.ts # Cliente HTTP das configurações
+            ├── auth.service.ts     # Cliente HTTP de login/conta
             └── i18n.service.ts     # Traduções da interface (pt/en) e idioma ativo
 ```
 
@@ -92,6 +101,34 @@ npx ng serve
 ```
 
 Acesse `http://localhost:4200`. As requisições para `/api` são automaticamente encaminhadas para o backend via [`proxy.conf.json`](frontend/proxy.conf.json).
+
+### Docker
+
+```bash
+docker compose up -d --build
+```
+
+A pasta `./data` (na raiz do projeto) é montada como volume dentro do container (`/app/data`). É lá que ficam `settings.json` (chaves de API e prompt) e `auth.json` (usuário/senha de login) — como é uma pasta do host montada por bind mount, ela **nunca é apagada** por um `docker compose up --build`/atualização de imagem. Configure as chaves de API pela tela **Configurações** em vez do `.env`: assim elas sobrevivem a qualquer rebuild.
+
+---
+
+## 🔐 Login
+
+O app fica protegido por tela de login. Usuário e senha padrão na primeira execução:
+
+```
+usuário: admin
+senha:   admin
+```
+
+As credenciais ficam salvas (hash + salt, nunca em texto puro) em `data/auth.json`, na mesma pasta persistente usada pelas configurações — troque a senha assim que possível.
+
+Pela tela **Conta** (aba ao lado de Configurações), com login já feito, dá para:
+
+- Trocar o **usuário**, informando a senha atual
+- Trocar a **senha**, informando a senha atual e confirmando a nova
+
+Nenhuma das duas operações derruba a sessão atual — não é necessário logar de novo depois de alterar usuário ou senha.
 
 ---
 
@@ -140,11 +177,13 @@ O header tem duas bandeiras (🇧🇷 / 🇺🇸) para alternar o idioma dos tex
 
 ## 🔒 Segurança
 
+- Todas as rotas `/api/subtitles`, `/api/settings` e `/api/docs` exigem login (cookie de sessão `HttpOnly`); só `/api/auth/login` fica aberta.
+- Senha do login é guardada com hash `scrypt` + salt aleatório, nunca em texto puro.
 - Chaves de API **nunca** são enviadas ao frontend em texto completo — apenas mascaradas.
-- `data/settings.json` (onde as chaves configuradas pela UI ficam salvas) e `.env` estão no `.gitignore` e **não devem ser commitados**.
+- `data/settings.json`, `data/auth.json` e `.env` estão no `.gitignore` e **não devem ser commitados**.
 - Uploads são limitados a 5 MB e validados por extensão, MIME type e estrutura interna do `.srt`.
 
-> **Antes de publicar este repositório**, confira se `.env` e `data/settings.json` não estão sendo versionados (`git status` não deve listá-los) e se o `.env.example` contém apenas placeholders vazios.
+> **Antes de publicar este repositório**, confira se `.env`, `data/settings.json` e `data/auth.json` não estão sendo versionados (`git status` não deve listá-los) e se o `.env.example` contém apenas placeholders vazios.
 
 ---
 
@@ -152,7 +191,7 @@ O header tem duas bandeiras (🇧🇷 / 🇺🇸) para alternar o idioma dos tex
 
 - Persistir jobs em Redis/banco para sobreviver a restarts
 - Suporte a outros formatos de legenda (`.vtt`, `.ass`)
-- Autenticação para uso multiusuário
+- Múltiplos usuários (hoje o login é de um único usuário/senha compartilhado)
 
 ---
 

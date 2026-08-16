@@ -1,0 +1,48 @@
+<div class="panel">
+  <span class="eyebrow">AI · Neural Translation</span>
+  <h2>{{ i18n.t('login.title') }}</h2>
+  <p class="subtitle">{{ i18n.t('login.subtitle') }}</p>
+
+  <form (ngSubmit)="submit()">
+    <label class="field">
+      <span>{{ i18n.t('login.username') }}</span>
+      <input
+        type="text"
+        name="username"
+        [ngModel]="username()"
+        (ngModelChange)="username.set($event)"
+        autocomplete="username"
+        autofocus
+      />
+    </label>
+
+    <label class="field">
+      <span>{{ i18n.t('login.password') }}</span>
+      <input
+        type="password"
+        name="password"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+        autocomplete="current-password"
+      />
+    </label>
+
+    <label class="remember-field">
+      <input
+        type="checkbox"
+        name="remember"
+        [ngModel]="remember()"
+        (ngModelChange)="remember.set($event)"
+      />
+      <span>{{ i18n.t('login.remember') }}</span>
+    </label>
+
+    <button type="submit" [disabled]="loading() || !username() || !password()">
+      {{ loading() ? i18n.t('login.loading') : i18n.t('login.submit') }}
+    </button>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+  </form>
+</div>

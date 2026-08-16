@@ -8,13 +8,16 @@ const express = require("express");
 const subtitleRoutes = require("./routes/subtitle.routes");
 const settingsRoutes = require("./routes/settings.routes");
 const docsRoutes = require("./routes/docs.routes");
+const authRoutes = require("./routes/auth.routes");
+const { requireAuth } = require("./middleware/auth.middleware");
 
 const app = express();
 
 app.use(express.json());
-app.use("/api/subtitles", subtitleRoutes);
-app.use("/api/settings", settingsRoutes);
-app.use("/api/docs", docsRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/subtitles", requireAuth, subtitleRoutes);
+app.use("/api/settings", requireAuth, settingsRoutes);
+app.use("/api/docs", requireAuth, docsRoutes);
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 

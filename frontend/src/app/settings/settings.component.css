@@ -34,6 +34,28 @@ h2 {
   font-size: 13px;
 }
 
+.field-row {
+  display: flex;
+  gap: 14px;
+}
+
+.field-row .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.field-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.inline-button {
+  width: auto;
+  flex-shrink: 0;
+  margin-top: 0;
+  padding: 11px 18px;
+}
+
 .field span {
   color: var(--text-muted);
   text-transform: uppercase;

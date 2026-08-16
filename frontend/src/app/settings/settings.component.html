@@ -4,23 +4,25 @@
   <p class="subtitle">{{ i18n.t('settings.subtitle') }}</p>
 
   @if (settings()) {
-    <label class="field">
-      <span>{{ i18n.t('settings.provider') }}</span>
-      <select [ngModel]="selectedProvider()" (ngModelChange)="onProviderChange($event)">
-        @for (p of settings()!.providers; track p.id) {
-          <option [value]="p.id">{{ p.name }}</option>
-        }
-      </select>
-    </label>
+    <div class="field-row">
+      <label class="field">
+        <span>{{ i18n.t('settings.provider') }}</span>
+        <select [ngModel]="selectedProvider()" (ngModelChange)="onProviderChange($event)">
+          @for (p of settings()!.providers; track p.id) {
+            <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+      </label>
 
-    <label class="field">
-      <span>{{ i18n.t('settings.model') }}</span>
-      <select [(ngModel)]="selectedModel">
-        @for (m of currentProviderInfo?.models; track m.id) {
-          <option [value]="m.id">{{ m.name }}</option>
-        }
-      </select>
-    </label>
+      <label class="field">
+        <span>{{ i18n.t('settings.model') }}</span>
+        <select [(ngModel)]="selectedModel">
+          @for (m of currentProviderInfo?.models; track m.id) {
+            <option [value]="m.id">{{ m.name }}</option>
+          }
+        </select>
+      </label>
+    </div>
 
     <label class="field">
       <span>
@@ -31,17 +33,18 @@
           <span class="badge badge-warn">{{ i18n.t('settings.apiKey.missing') }}</span>
         }
       </span>
-      <input
-        type="password"
-        [(ngModel)]="apiKeyInput"
-        [placeholder]="i18n.t('settings.apiKey.placeholder')"
-        autocomplete="off"
-      />
+      <div class="field-row">
+        <input
+          type="password"
+          [(ngModel)]="apiKeyInput"
+          [placeholder]="i18n.t('settings.apiKey.placeholder')"
+          autocomplete="off"
+        />
+        <button class="inline-button" (click)="save()" [disabled]="saving()">
+          {{ saving() ? i18n.t('settings.saving') : i18n.t('settings.save') }}
+        </button>
+      </div>
     </label>
-
-    <button (click)="save()" [disabled]="saving()">
-      {{ saving() ? i18n.t('settings.saving') : i18n.t('settings.save') }}
-    </button>
 
     @if (saved()) {
       <p class="success">{{ i18n.t('settings.saved') }}</p>

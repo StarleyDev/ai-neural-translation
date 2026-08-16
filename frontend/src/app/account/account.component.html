@@ -1,0 +1,68 @@
+<div class="panel">
+  <span class="eyebrow">{{ i18n.t('account.eyebrow') }}</span>
+  <h2>{{ i18n.t('account.title') }}</h2>
+  <p class="subtitle">{{ i18n.t('account.subtitle') }}</p>
+
+  <div class="section">
+    <h3>{{ i18n.t('account.username.title') }}</h3>
+    <p class="hint">{{ i18n.t('account.username.subtitle', { value: currentUsername }) }}</p>
+
+    <label class="field">
+      <span>{{ i18n.t('account.username.new') }}</span>
+      <input type="text" [(ngModel)]="newUsername" autocomplete="username" />
+    </label>
+
+    <label class="field">
+      <span>{{ i18n.t('account.username.password') }}</span>
+      <input type="password" [(ngModel)]="usernamePassword" autocomplete="current-password" />
+    </label>
+
+    <button
+      (click)="changeUsername()"
+      [disabled]="savingUsername() || !newUsername || !usernamePassword"
+    >
+      {{ savingUsername() ? i18n.t('account.saving') : i18n.t('account.username.save') }}
+    </button>
+
+    @if (usernameSaved()) {
+      <p class="success">{{ i18n.t('account.username.saved') }}</p>
+    }
+    @if (usernameError()) {
+      <p class="error">{{ usernameError() }}</p>
+    }
+  </div>
+
+  <div class="section">
+    <h3>{{ i18n.t('account.password.title') }}</h3>
+    <p class="hint">{{ i18n.t('account.password.subtitle') }}</p>
+
+    <label class="field">
+      <span>{{ i18n.t('account.password.current') }}</span>
+      <input type="password" [(ngModel)]="currentPassword" autocomplete="current-password" />
+    </label>
+
+    <label class="field">
+      <span>{{ i18n.t('account.password.new') }}</span>
+      <input type="password" [(ngModel)]="newPassword" autocomplete="new-password" />
+    </label>
+
+    <label class="field">
+      <span>{{ i18n.t('account.password.confirm') }}</span>
+      <input type="password" [(ngModel)]="confirmPassword" autocomplete="new-password" />
+    </label>
+
+    <button
+      (click)="changePassword()"
+      [disabled]="savingPassword() || !currentPassword || !newPassword || !confirmPassword"
+    >
+      {{ savingPassword() ? i18n.t('account.saving') : i18n.t('account.password.save') }}
+    </button>
+
+    @if (passwordSaved()) {
+      <p class="success">{{ i18n.t('account.password.saved') }}</p>
+    }
+    @if (passwordError()) {
+      <p class="error">{{ passwordError() }}</p>
+    }
+  </div>
+</div>
