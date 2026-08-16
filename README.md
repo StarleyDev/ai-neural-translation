@@ -110,6 +110,10 @@ docker compose up -d --build
 
 A pasta `./data` (na raiz do projeto) é montada como volume dentro do container (`/app/data`). É lá que ficam `settings.json` (chaves de API e prompt) e `auth.json` (usuário/senha de login) — como é uma pasta do host montada por bind mount, ela **nunca é apagada** por um `docker compose up --build`/atualização de imagem. Configure as chaves de API pela tela **Configurações** em vez do `.env`: assim elas sobrevivem a qualquer rebuild.
 
+> **HTTPS atrás de proxy reverso**: o cookie de sessão só recebe o atributo `Secure` quando a requisição chega como HTTPS (via TLS direto ou pelo header `X-Forwarded-Proto: https`). Se você expuser o app atrás de um proxy reverso (Nginx, Traefik, Cloudflare Tunnel etc.) com TLS, garanta que ele encaminhe esse header — caso contrário, acessando via HTTP puro, o login funciona mas a sessão não é mantida entre requisições.
+
+> **Sessões em memória**: as sessões de login ficam em memória no processo Node — reiniciar o container (ex: `docker compose up -d --build` numa atualização) invalida todas as sessões ativas, exigindo login novamente.
+
 ---
 
 ## 🔐 Login
