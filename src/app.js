@@ -7,12 +7,14 @@ const fs = require("fs");
 const express = require("express");
 const subtitleRoutes = require("./routes/subtitle.routes");
 const settingsRoutes = require("./routes/settings.routes");
+const docsRoutes = require("./routes/docs.routes");
 
 const app = express();
 
 app.use(express.json());
 app.use("/api/subtitles", subtitleRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/docs", docsRoutes);
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 

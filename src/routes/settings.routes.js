@@ -14,8 +14,8 @@ router.put("/", (req, res) =>
 {
     try
     {
-        const { provider, model, apiKey } = req.body;
-        const updated = settingsStore.update({ provider, model, apiKey });
+        const { provider, model, apiKey, promptTemplate, resetPromptTemplate } = req.body;
+        const updated = settingsStore.update({ provider, model, apiKey, promptTemplate, resetPromptTemplate });
         return res.json(updated);
     }
     catch (error)

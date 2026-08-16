@@ -5,16 +5,17 @@ const { buildPrompt, extractJsonArray, mapResults } = require("./base");
 
 class GoogleProvider
 {
-    constructor({ apiKey, model })
+    constructor({ apiKey, model, promptTemplate })
     {
         this.client = new GoogleGenerativeAI(apiKey);
         this.model = model;
+        this.promptTemplate = promptTemplate;
     }
 
     async translateBatch(batch, targetLanguage, { signal } = {})
     {
         const payload = batch.map((b, idx) => ({ id: idx, text: b.text }));
-        const prompt = buildPrompt(payload, targetLanguage);
+        const prompt = buildPrompt(payload, targetLanguage, this.promptTemplate);
 
         const model = this.client.getGenerativeModel({ model: this.model });
         const result = await model.generateContent(prompt, { signal });

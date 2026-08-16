@@ -16,6 +16,9 @@ Envie uma legenda em outro idioma, escolha o provedor de IA e receba o `.srt` tr
 - 🤖 **Múltiplos provedores de IA** — troque entre Anthropic (Claude), OpenAI e Google (Gemini) direto pela tela de Configurações
 - 🔑 **Gerenciamento de credenciais** — chaves de API nunca são expostas por completo, apenas mascaradas (`sk-ant••••qQAA`)
 - 📊 **Progresso em tempo real** — barra de progresso via Server-Sent Events acompanhando a tradução lote a lote
+- ⛔ **Cancelamento** — interrompa uma tradução em andamento a qualquer momento
+- 📝 **Prompt editável** — personalize o texto enviado à IA na tela de Configurações, com um padrão definido no `.env`
+- 🌐 **Interface multilíngue** — troque entre 🇧🇷 português e 🇺🇸 inglês pelas bandeiras no header
 - 🌓 **Interface dark/futurista** em Angular, standalone components, sem dependências pesadas
 
 ---
@@ -40,9 +43,11 @@ ia-translate/
 │
 └── frontend/                     # Angular (standalone, sem Router)
     └── src/app/
-        ├── translate/            # Tela de tradução + barra de progresso
-        ├── settings/             # Tela de configuração de provedor/modelo/chave
-        └── services/             # Clientes HTTP
+        ├── translate/            # Tela de tradução + barra de progresso + cancelamento
+        ├── settings/             # Tela de configuração de provedor/modelo/chave/prompt
+        └── services/
+            ├── settings.service.ts # Cliente HTTP das configurações
+            └── i18n.service.ts     # Traduções da interface (pt/en) e idioma ativo
 ```
 
 ### Como a tradução funciona
@@ -105,6 +110,31 @@ Se nenhuma chave for salva pela interface, o backend usa como fallback as variá
 | `ANTHROPIC_API_KEY` | Anthropic |
 | `OPENAI_API_KEY`    | OpenAI    |
 | `GOOGLE_API_KEY`    | Google    |
+
+---
+
+## 📝 Personalizando o prompt de tradução
+
+O texto enviado à IA a cada lote de legendas pode ser ajustado sem tocar em código:
+
+- **Padrão**: definido pela variável `TRANSLATION_PROMPT_TEMPLATE` no `.env` (veja [`.env.example`](.env.example)). Se não for definida, o backend usa um prompt embutido no código.
+- **Personalização**: na tela **Configurações**, o campo **Prompt de tradução** mostra o texto atual (padrão ou já customizado) e permite editar e salvar. O ajuste feito pela UI tem prioridade sobre o `.env` e fica salvo em `data/settings.json`.
+- **Restaurar padrão**: o botão **Restaurar padrão** remove a customização salva e volta a usar o valor do `.env`.
+
+Dois placeholders são substituídos automaticamente antes de cada requisição ao modelo:
+
+| Placeholder | Conteúdo |
+| --- | --- |
+| `{{targetLanguage}}` | Idioma de destino escolhido no upload |
+| `{{items}}` | JSON com os blocos de legenda daquele lote |
+
+> O prompt precisa conter obrigatoriamente `{{items}}` — sem ele a requisição não tem como enviar as legendas ao modelo, e o backend recusa salvar.
+
+---
+
+## 🌐 Idioma da interface
+
+O header tem duas bandeiras (🇧🇷 / 🇺🇸) para alternar o idioma dos textos da interface entre português e inglês. A escolha fica salva no navegador (`localStorage`) e não afeta o **idioma de destino da tradução**, que é selecionado separadamente na tela de Tradução.
 
 ---
 

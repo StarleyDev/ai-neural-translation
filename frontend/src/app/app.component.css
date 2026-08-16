@@ -22,17 +22,61 @@
 .shell {
     position: relative;
     width: 100%;
-    max-width: 540px;
+    max-width: 640px;
+}
+
+.header {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 14px;
 }
 
 .tabs {
     display: flex;
     gap: 6px;
-    margin-bottom: 14px;
+    flex: 1;
     padding: 4px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border);
     border-radius: 12px;
+}
+
+.lang-switch {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.lang-flag {
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 17px;
+    line-height: 1;
+    padding: 6px 8px;
+    cursor: pointer;
+    opacity: 0.45;
+    filter: grayscale(70%);
+    transition:
+        opacity 0.2s,
+        filter 0.2s,
+        background 0.2s,
+        box-shadow 0.2s;
+}
+
+.lang-flag:hover {
+    opacity: 0.75;
+}
+
+.lang-flag.active {
+    opacity: 1;
+    filter: grayscale(0%);
+    background: rgba(34, 211, 238, 0.1);
+    box-shadow: 0 0 16px rgba(34, 211, 238, 0.15);
 }
 
 .tab {

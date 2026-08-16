@@ -5,16 +5,17 @@ const { buildPrompt, extractJsonArray, mapResults } = require("./base");
 
 class OpenAiProvider
 {
-    constructor({ apiKey, model })
+    constructor({ apiKey, model, promptTemplate })
     {
         this.client = new OpenAI({ apiKey });
         this.model = model;
+        this.promptTemplate = promptTemplate;
     }
 
     async translateBatch(batch, targetLanguage, { signal } = {})
     {
         const payload = batch.map((b, idx) => ({ id: idx, text: b.text }));
-        const prompt = buildPrompt(payload, targetLanguage);
+        const prompt = buildPrompt(payload, targetLanguage, this.promptTemplate);
 
         const response = await this.client.chat.completions.create(
             {

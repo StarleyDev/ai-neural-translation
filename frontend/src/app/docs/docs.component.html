@@ -1,0 +1,17 @@
+<div class="docs-header">
+  <button class="back-button" type="button" (click)="back.emit()">← Voltar</button>
+</div>
+
+<div class="panel">
+  @if (loading()) {
+    <p class="hint">Carregando documentação...</p>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (html()) {
+    <div class="markdown" [innerHTML]="html()"></div>
+  }
+</div>

@@ -20,12 +20,17 @@ export interface AppSettings {
   model: string;
   providers: ProviderInfo[];
   appVersion: string;
+  promptTemplate: string;
+  isDefaultPromptTemplate: boolean;
+  defaultPromptTemplate: string;
 }
 
 export interface UpdateSettingsPayload {
   provider?: string;
   model?: string;
   apiKey?: string;
+  promptTemplate?: string;
+  resetPromptTemplate?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -62,8 +62,15 @@ h2 {
   border-color: rgba(251, 191, 36, 0.3);
 }
 
+.badge-accent {
+  color: var(--neon-pink);
+  background: rgba(236, 72, 153, 0.1);
+  border-color: rgba(236, 72, 153, 0.25);
+}
+
 select,
-input {
+input,
+textarea {
   padding: 11px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -75,13 +82,21 @@ input {
   font-family: inherit;
 }
 
+textarea {
+  resize: vertical;
+  font-family: 'Courier New', monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
 select option {
   background: var(--bg-1);
   color: var(--text-primary);
 }
 
 select:focus,
-input:focus {
+input:focus,
+textarea:focus {
   border-color: var(--neon-violet);
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
 }
@@ -139,6 +154,42 @@ button:disabled {
   border: 1px solid rgba(251, 113, 133, 0.25);
 }
 
+.prompt-section {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+
+.prompt-hint {
+  margin: -4px 0 14px;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.prompt-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.prompt-actions button {
+  margin-top: 0;
+}
+
+button.secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary, var(--text-muted));
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+button.secondary:hover:not(:disabled) {
+  filter: none;
+  border-color: var(--neon-violet);
+  color: var(--text-primary);
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.15);
+}
+
 .info-box {
   display: flex;
   align-items: center;
@@ -149,6 +200,27 @@ button:disabled {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
   font-size: 12px;
+}
+
+.docs-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: rgba(34, 211, 238, 0.06);
+  color: var(--neon-cyan);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.docs-button:hover {
+  background: rgba(34, 211, 238, 0.12);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.2);
 }
 
 .info-box span {

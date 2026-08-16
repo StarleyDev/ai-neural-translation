@@ -1,11 +1,11 @@
 <div class="panel">
-  <span class="eyebrow">Configuração</span>
-  <h2>Provedor de IA</h2>
-  <p class="subtitle">Escolha o provedor e o modelo usados para traduzir as legendas.</p>
+  <span class="eyebrow">{{ i18n.t('settings.eyebrow') }}</span>
+  <h2>{{ i18n.t('settings.title') }}</h2>
+  <p class="subtitle">{{ i18n.t('settings.subtitle') }}</p>
 
   @if (settings()) {
     <label class="field">
-      <span>Provedor</span>
+      <span>{{ i18n.t('settings.provider') }}</span>
       <select [ngModel]="selectedProvider()" (ngModelChange)="onProviderChange($event)">
         @for (p of settings()!.providers; track p.id) {
           <option [value]="p.id">{{ p.name }}</option>
@@ -14,7 +14,7 @@
     </label>
 
     <label class="field">
-      <span>Modelo</span>
+      <span>{{ i18n.t('settings.model') }}</span>
       <select [(ngModel)]="selectedModel">
         @for (m of currentProviderInfo?.models; track m.id) {
           <option [value]="m.id">{{ m.name }}</option>
@@ -24,36 +24,71 @@
 
     <label class="field">
       <span>
-        Chave de API
+        {{ i18n.t('settings.apiKey') }}
         @if (currentProviderInfo?.hasApiKey) {
-          <span class="badge">configurada: {{ currentProviderInfo?.apiKeyMasked }}</span>
+          <span class="badge">{{ i18n.t('settings.apiKey.configured', { value: currentProviderInfo?.apiKeyMasked || '' }) }}</span>
         } @else {
-          <span class="badge badge-warn">não configurada</span>
+          <span class="badge badge-warn">{{ i18n.t('settings.apiKey.missing') }}</span>
         }
       </span>
       <input
         type="password"
         [(ngModel)]="apiKeyInput"
-        placeholder="Cole uma nova chave para substituir"
+        [placeholder]="i18n.t('settings.apiKey.placeholder')"
         autocomplete="off"
       />
     </label>
 
     <button (click)="save()" [disabled]="saving()">
-      {{ saving() ? 'Salvando...' : 'Salvar configurações' }}
+      {{ saving() ? i18n.t('settings.saving') : i18n.t('settings.save') }}
     </button>
 
     @if (saved()) {
-      <p class="success">Configurações salvas.</p>
+      <p class="success">{{ i18n.t('settings.saved') }}</p>
     }
 
+    <div class="prompt-section">
+      <label class="field">
+        <span>
+          {{ i18n.t('settings.prompt.title') }}
+          @if (settings()!.isDefaultPromptTemplate) {
+            <span class="badge">{{ i18n.t('settings.prompt.default') }}</span>
+          } @else {
+            <span class="badge badge-accent">{{ i18n.t('settings.prompt.custom') }}</span>
+          }
+        </span>
+        <textarea rows="6" [(ngModel)]="promptDraft"></textarea>
+      </label>
+      <p class="prompt-hint">{{ i18n.t('settings.prompt.subtitle') }}</p>
+
+      <div class="prompt-actions">
+        <button class="secondary" (click)="resetPrompt()" [disabled]="savingPrompt()">
+          {{ i18n.t('settings.prompt.reset') }}
+        </button>
+        <button (click)="savePrompt()" [disabled]="savingPrompt()">
+          {{ savingPrompt() ? i18n.t('settings.saving') : i18n.t('settings.prompt.save') }}
+        </button>
+      </div>
+
+      @if (promptSaved()) {
+        <p class="success">{{ i18n.t('settings.prompt.saved') }}</p>
+      }
+      @if (promptError()) {
+        <p class="error">{{ promptError() }}</p>
+      }
+    </div>
+
     <div class="info-box">
-      <span>Versão</span>
+      <span>{{ i18n.t('settings.version') }}</span>
       <strong>v{{ settings()!.appVersion }}</strong>
     </div>
 
+    <button class="docs-button" type="button" (click)="openDocs.emit()">
+      {{ i18n.t('settings.docs') }}
+    </button>
+
     <div class="author-box">
-      <span class="author-label">Desenvolvido por</span>
+      <span class="author-label">{{ i18n.t('settings.author') }}</span>
       <div class="author-row">
         <span class="author-name">Starley Cazorla</span>
         <div class="author-links">

@@ -3,6 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const { PROVIDERS } = require("./providers");
+const { DEFAULT_PROMPT_TEMPLATE } = require("../services/providers/base");
 
 const SETTINGS_PATH = path.join(__dirname, "..", "..", "data", "settings.json");
 const APP_VERSION = require("../../package.json").version;
@@ -18,7 +19,7 @@ function readRaw()
 {
     if (!fs.existsSync(SETTINGS_PATH))
     {
-        return { provider: "anthropic", model: PROVIDERS.anthropic.defaultModel, apiKeys: {} };
+        return { provider: "anthropic", model: PROVIDERS.anthropic.defaultModel, apiKeys: {}, promptTemplate: null };
     }
     const content = fs.readFileSync(SETTINGS_PATH, "utf-8");
     return JSON.parse(content);
@@ -40,6 +41,13 @@ function resolveApiKey(providerId, apiKeys)
     return envVar ? process.env[envVar] || null : null;
 }
 
+// Prioridade: ajuste salvo pela UI > padrão definido no .env > padrão embutido no código.
+function resolvePromptTemplate(saved)
+{
+    if (saved) return saved;
+    return process.env.TRANSLATION_PROMPT_TEMPLATE || DEFAULT_PROMPT_TEMPLATE;
+}
+
 class SettingsStore
 {
     getPublicSettings()
@@ -59,6 +67,9 @@ class SettingsStore
             model: raw.model,
             providers,
             appVersion: APP_VERSION,
+            promptTemplate: resolvePromptTemplate(raw.promptTemplate),
+            isDefaultPromptTemplate: !raw.promptTemplate,
+            defaultPromptTemplate: process.env.TRANSLATION_PROMPT_TEMPLATE || DEFAULT_PROMPT_TEMPLATE,
         };
     }
 
@@ -75,10 +86,15 @@ class SettingsStore
             );
         }
 
-        return { provider: raw.provider, model: raw.model, apiKey };
+        return {
+            provider: raw.provider,
+            model: raw.model,
+            apiKey,
+            promptTemplate: resolvePromptTemplate(raw.promptTemplate),
+        };
     }
 
-    update({ provider, model, apiKey })
+    update({ provider, model, apiKey, promptTemplate, resetPromptTemplate })
     {
         const raw = readRaw();
 
@@ -94,6 +110,19 @@ class SettingsStore
         {
             raw.apiKeys = raw.apiKeys || {};
             raw.apiKeys[raw.provider] = apiKey;
+        }
+
+        if (resetPromptTemplate)
+        {
+            raw.promptTemplate = null;
+        }
+        else if (typeof promptTemplate === "string" && promptTemplate.trim())
+        {
+            if (!promptTemplate.includes("{{items}}"))
+            {
+                throw new Error('O prompt precisa conter o placeholder "{{items}}".');
+            }
+            raw.promptTemplate = promptTemplate;
         }
 
         writeRaw(raw);

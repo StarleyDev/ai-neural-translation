@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppSettings, ProviderInfo, SettingsService } from '../services/settings.service';
+import { I18nService } from '../services/i18n.service';
 
 @Component({
   selector: 'app-settings',
@@ -11,6 +12,8 @@ import { AppSettings, ProviderInfo, SettingsService } from '../services/settings
   styleUrl: './settings.component.css',
 })
 export class SettingsComponent implements OnInit {
+  @Output() openDocs = new EventEmitter<void>();
+
   settings = signal<AppSettings | null>(null);
   selectedProvider = signal<string>('');
   selectedModel = signal<string>('');
@@ -19,7 +22,15 @@ export class SettingsComponent implements OnInit {
   saved = signal(false);
   error = signal<string>('');
 
-  constructor(private readonly settingsService: SettingsService) {}
+  promptDraft = '';
+  savingPrompt = signal(false);
+  promptSaved = signal(false);
+  promptError = signal<string>('');
+
+  constructor(
+    private readonly settingsService: SettingsService,
+    public readonly i18n: I18nService
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -31,6 +42,7 @@ export class SettingsComponent implements OnInit {
         this.settings.set(data);
         this.selectedProvider.set(data.provider);
         this.selectedModel.set(data.model);
+        this.promptDraft = data.promptTemplate;
       },
       error: () => this.error.set('Não foi possível carregar as configurações.'),
     });
@@ -73,6 +85,44 @@ export class SettingsComponent implements OnInit {
       error: (err) => {
         this.error.set(err.error?.error || 'Falha ao salvar configurações.');
         this.saving.set(false);
+      },
+    });
+  }
+
+  savePrompt(): void {
+    this.savingPrompt.set(true);
+    this.promptSaved.set(false);
+    this.promptError.set('');
+
+    this.settingsService.update({ promptTemplate: this.promptDraft }).subscribe({
+      next: (data) => {
+        this.settings.set(data);
+        this.promptDraft = data.promptTemplate;
+        this.savingPrompt.set(false);
+        this.promptSaved.set(true);
+      },
+      error: (err) => {
+        this.promptError.set(err.error?.error || 'Falha ao salvar o prompt.');
+        this.savingPrompt.set(false);
+      },
+    });
+  }
+
+  resetPrompt(): void {
+    this.savingPrompt.set(true);
+    this.promptSaved.set(false);
+    this.promptError.set('');
+
+    this.settingsService.update({ resetPromptTemplate: true }).subscribe({
+      next: (data) => {
+        this.settings.set(data);
+        this.promptDraft = data.promptTemplate;
+        this.savingPrompt.set(false);
+        this.promptSaved.set(true);
+      },
+      error: (err) => {
+        this.promptError.set(err.error?.error || 'Falha ao restaurar o prompt.');
+        this.savingPrompt.set(false);
       },
     });
   }

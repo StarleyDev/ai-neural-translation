@@ -1,15 +1,15 @@
 <div class="panel">
-  <span class="eyebrow">AI · Neural Translation</span>
-  <h1>Tradução de Legendas</h1>
-  <p class="subtitle">Envie um arquivo .srt e receba a tradução para o idioma desejado.</p>
+  <span class="eyebrow">{{ i18n.t('translate.eyebrow') }}</span>
+  <h1>{{ i18n.t('translate.title') }}</h1>
+  <p class="subtitle">{{ i18n.t('translate.subtitle') }}</p>
 
   <label class="field">
-    <span>Arquivo .srt</span>
+    <span>{{ i18n.t('translate.file') }}</span>
     <input type="file" accept=".srt" (change)="onFileSelected($event)" />
   </label>
 
   <label class="field">
-    <span>Idioma de destino</span>
+    <span>{{ i18n.t('translate.targetLanguage') }}</span>
     <select [(ngModel)]="targetLanguage">
       <option value="pt-br">Português (Brasil)</option>
       <option value="en">Inglês</option>
@@ -18,7 +18,7 @@
   </label>
 
   <button (click)="translate()" [disabled]="status() === 'uploading' || status() === 'translating'">
-    {{ status() === 'uploading' || status() === 'translating' ? 'Traduzindo...' : 'Traduzir' }}
+    {{ status() === 'uploading' || status() === 'translating' ? i18n.t('translate.buttonLoading') : i18n.t('translate.button') }}
   </button>
 
   @if (status() === 'translating' || status() === 'uploading') {
@@ -27,19 +27,19 @@
     </div>
     <p class="hint">
       @if (totalBatches() > 0) {
-        Lote {{ currentBatch() }} de {{ totalBatches() }} — {{ progressPercent() }}%
+        {{ i18n.t('translate.hint.batch', { current: currentBatch(), total: totalBatches(), percent: progressPercent() }) }}
       } @else {
-        Preparando tradução...
+        {{ i18n.t('translate.hint.preparing') }}
       }
     </p>
 
     @if (status() === 'translating') {
-      <button class="cancel" (click)="cancel()">Cancelar tradução</button>
+      <button class="cancel" (click)="cancel()">{{ i18n.t('translate.cancel') }}</button>
     }
   }
 
   @if (status() === 'cancelled') {
-    <p class="hint">Tradução cancelada.</p>
+    <p class="hint">{{ i18n.t('translate.cancelled') }}</p>
   }
 
   @if (status() === 'error') {
@@ -47,6 +47,6 @@
   }
 
   @if (status() === 'done' && downloadUrl()) {
-    <a class="download" [href]="downloadUrl()" [download]="downloadName()">Baixar {{ downloadName() }}</a>
+    <a class="download" [href]="downloadUrl()" [download]="downloadName()">{{ i18n.t('translate.download', { name: downloadName() }) }}</a>
   }
 </div>

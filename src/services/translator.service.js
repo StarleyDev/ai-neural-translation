@@ -26,7 +26,7 @@ class TranslatorService
 {
     constructor()
     {
-        const { provider, model, apiKey } = settingsStore.getActiveConfig();
+        const { provider, model, apiKey, promptTemplate } = settingsStore.getActiveConfig();
 
         const ProviderClass = PROVIDER_CLASSES[provider];
         if (!ProviderClass)
@@ -35,7 +35,7 @@ class TranslatorService
         }
 
         this.providerId = provider;
-        this.provider = new ProviderClass({ apiKey, model });
+        this.provider = new ProviderClass({ apiKey, model, promptTemplate });
     }
 
     async translateBlocks(blocks, targetLanguage = "pt-br", onProgress, signal)

@@ -1,15 +1,20 @@
 "use strict";
 
-function buildPrompt(payload, targetLanguage)
+const DEFAULT_PROMPT_TEMPLATE =
+    `Traduza as legendas abaixo para {{targetLanguage}}. ` +
+    `Mantenha o tom, quebras de linha e formatação (tags como <i>, <b>) de cada item. ` +
+    `Não traduza nomes próprios óbvios quando não fizer sentido. ` +
+    `Responda APENAS com um JSON array no formato [{"id": number, "text": string}, ...], ` +
+    `na mesma ordem e quantidade dos itens recebidos, sem nenhum texto adicional.\n\n` +
+    `Itens:\n{{items}}`;
+
+function buildPrompt(payload, targetLanguage, template)
 {
-    return (
-        `Traduza as legendas abaixo para ${targetLanguage}. ` +
-        `Mantenha o tom, quebras de linha e formatação (tags como <i>, <b>) de cada item. ` +
-        `Não traduza nomes próprios óbvios quando não fizer sentido. ` +
-        `Responda APENAS com um JSON array no formato [{"id": number, "text": string}, ...], ` +
-        `na mesma ordem e quantidade dos itens recebidos, sem nenhum texto adicional.\n\n` +
-        `Itens:\n${JSON.stringify(payload)}`
-    );
+    const promptTemplate = template || DEFAULT_PROMPT_TEMPLATE;
+
+    return promptTemplate
+        .replaceAll("{{targetLanguage}}", targetLanguage)
+        .replaceAll("{{items}}", JSON.stringify(payload));
 }
 
 function extractJsonArray(raw)
@@ -31,4 +36,4 @@ function mapResults(batch, parsed)
     });
 }
 
-module.exports = { buildPrompt, extractJsonArray, mapResults };
+module.exports = { buildPrompt, extractJsonArray, mapResults, DEFAULT_PROMPT_TEMPLATE };

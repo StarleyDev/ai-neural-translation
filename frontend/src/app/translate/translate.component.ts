@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { I18nService } from '../services/i18n.service';
 
 type Status = 'idle' | 'uploading' | 'translating' | 'done' | 'error' | 'cancelled';
 
@@ -27,7 +28,7 @@ export class TranslateComponent {
   private eventSource: EventSource | null = null;
   private currentJobId: string | null = null;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient, public readonly i18n: I18nService) {}
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -40,7 +41,7 @@ export class TranslateComponent {
     if (file && !file.name.toLowerCase().endsWith('.srt')) {
       this.selectedFile = null;
       input.value = '';
-      this.errorMessage.set('Apenas arquivos .srt são aceitos.');
+      this.errorMessage.set(this.i18n.t('translate.error.onlySrt'));
       this.status.set('error');
       return;
     }
@@ -51,7 +52,7 @@ export class TranslateComponent {
 
   translate(): void {
     if (!this.selectedFile) {
-      this.errorMessage.set('Selecione um arquivo .srt.');
+      this.errorMessage.set(this.i18n.t('translate.error.selectFile'));
       this.status.set('error');
       return;
     }
@@ -115,7 +116,7 @@ export class TranslateComponent {
       }
 
       if (data.type === 'error') {
-        this.errorMessage.set(data.message || 'Falha ao traduzir a legenda.');
+        this.errorMessage.set(data.message || this.i18n.t('translate.error.generic'));
         this.status.set('error');
         this.eventSource?.close();
       }
@@ -123,7 +124,7 @@ export class TranslateComponent {
 
     this.eventSource.onerror = () => {
       if (this.status() === 'translating') {
-        this.errorMessage.set('Conexão perdida durante a tradução.');
+        this.errorMessage.set(this.i18n.t('translate.error.connectionLost'));
         this.status.set('error');
       }
       this.eventSource?.close();
@@ -141,6 +142,6 @@ export class TranslateComponent {
   }
 
   private extractErrorMessage(err: HttpErrorResponse): string {
-    return err.error?.error || err.message || 'Falha ao traduzir a legenda.';
+    return err.error?.error || err.message || this.i18n.t('translate.error.generic');
   }
 }
