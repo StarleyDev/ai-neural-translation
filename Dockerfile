@@ -22,6 +22,7 @@ COPY README.md ./README.md
 COPY --from=frontend-build /app/frontend/dist/ia-translate-frontend/browser ./public
 
 ENV NODE_ENV=production
+ENV DATA_DIR=/config
 EXPOSE 3000
 
 CMD ["node", "src/app.js"]

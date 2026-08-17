@@ -3,10 +3,11 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { DATA_DIR } = require("./data-dir");
 
-// Guardado em /app/data, que é montado como volume persistente pelo Docker
+// Guardado em DATA_DIR, que é montado como volume persistente pelo Docker
 // (veja docker-compose.yml) — sobrevive a rebuilds/atualizações do container.
-const AUTH_PATH = path.join(__dirname, "..", "..", "data", "auth.json");
+const AUTH_PATH = path.join(DATA_DIR, "auth.json");
 
 const DEFAULT_USERNAME = "admin";
 const DEFAULT_PASSWORD = "admin";

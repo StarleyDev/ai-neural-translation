@@ -1,5 +1,5 @@
 services:
-  ia-neural-translation:
+  ai-neural-translation:
     build: .
     ports:
       - '3000:3000'
@@ -7,12 +7,12 @@ services:
       - PORT=3000
       - NODE_ENV=production
       # As chaves de API não precisam mais ser definidas aqui: configure-as
-      # pela tela de Configurações do app, elas ficam salvas em ./data/settings.json
-      # (pasta montada abaixo, que o Docker nunca apaga em rebuilds/atualizações).
+      # pela tela de Configurações do app, elas ficam salvas em settings.json
+      # dentro do volume montado abaixo, que o Docker nunca apaga em rebuilds/atualizações.
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-5}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
     volumes:
-      - ./data:/app/data
+      - /DATA/AppData/ai-neural-translation:/config
     restart: unless-stopped

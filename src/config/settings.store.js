@@ -4,8 +4,9 @@ const fs = require("fs");
 const path = require("path");
 const { PROVIDERS } = require("./providers");
 const { DEFAULT_PROMPT_TEMPLATE } = require("../services/providers/base");
+const { DATA_DIR } = require("./data-dir");
 
-const SETTINGS_PATH = path.join(__dirname, "..", "..", "data", "settings.json");
+const SETTINGS_PATH = path.join(DATA_DIR, "settings.json");
 const APP_VERSION = require("../../package.json").version;
 
 function maskKey(key)
