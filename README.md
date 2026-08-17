@@ -112,6 +112,13 @@ A pasta `/DATA/AppData/ai-neural-translation` (no host) é montada como volume d
 
 > Se o seu servidor não usa essa convenção, ajuste o caminho do host em `docker-compose.yml` (ex: `./data:/config` para um bind mount relativo ao projeto). O caminho dentro do container é controlado pela variável `DATA_DIR` (padrão `/config` na imagem Docker).
 
+> **⚠️ Atualizando de uma versão anterior à 3.0.3**: até a 3.0.2 os dados ficavam em `/app/data` (normalmente montado a partir de `./data`). A partir da 3.0.3 o caminho dentro do container mudou para `/config`, seguindo a convenção de appdata. **Essa migração não é automática** — antes de atualizar a imagem, você precisa mover manualmente `auth.json` e `settings.json` para o novo caminho do host, senão o app volta ao usuário/senha padrão (`admin`/`admin`) e perde as configurações salvas:
+>
+> 1. Ache onde estão hoje seus `auth.json`/`settings.json` (ex: `find / -maxdepth 4 -iname auth.json 2>/dev/null`, ou veja os mounts do container atual com `docker inspect <container_atual> --format '{{json .Mounts}}'`).
+> 2. Crie o novo diretório de destino, ex: `mkdir -p /DATA/AppData/ai-neural-translation`.
+> 3. Copie os dois arquivos pra lá: `cp auth.json settings.json /DATA/AppData/ai-neural-translation/` (ajuste os caminhos de origem/destino conforme seu ambiente — coloque os arquivos **direto** nessa pasta, sem subpasta extra).
+> 4. Atualize/recrie o container com o `docker-compose.yml` novo (volume apontando pra esse caminho em `/config`).
+
 > **HTTPS atrás de proxy reverso**: o cookie de sessão só recebe o atributo `Secure` quando a requisição chega como HTTPS (via TLS direto ou pelo header `X-Forwarded-Proto: https`). Se você expuser o app atrás de um proxy reverso (Nginx, Traefik, Cloudflare Tunnel etc.) com TLS, garanta que ele encaminhe esse header — caso contrário, acessando via HTTP puro, o login funciona mas a sessão não é mantida entre requisições.
 
 > **Sessões em memória**: as sessões de login ficam em memória no processo Node — reiniciar o container (ex: `docker compose up -d --build` numa atualização) invalida todas as sessões ativas, exigindo login novamente.
