@@ -1,6 +1,6 @@
 {
     "name": "ai-neural-translation",
-    "version": "3.0.4",
+    "version": "3.1.0",
     "description": "Serviço de tradução de legendas .srt para pt-br usando Claude / Gemini / OpenAI.",
     "main": "src/app.js",
     "scripts": {

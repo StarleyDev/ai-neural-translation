@@ -161,6 +161,8 @@ Se nenhuma chave for salva pela interface, o backend usa como fallback as variá
 | `OPENAI_API_KEY`    | OpenAI    |
 | `GOOGLE_API_KEY`    | Google    |
 
+O catálogo de modelos de cada provedor (em [`providers.js`](src/config/providers.js)) é curado manualmente e reflete os modelos disponíveis nas respectivas APIs — hoje **6** modelos Anthropic, **20** OpenAI (incluindo a série de raciocínio `o1`/`o3`/`o4-mini`) e **8** Google (Gemini). Como os provedores lançam e aposentam modelos com frequência, essa lista pode ficar desatualizada com o tempo — se notar um modelo faltando ou descontinuado, é só editar esse arquivo.
+
 ---
 
 ## 📝 Personalizando o prompt de tradução
@@ -179,6 +181,13 @@ Dois placeholders são substituídos automaticamente antes de cada requisição 
 | `{{items}}` | JSON com os blocos de legenda daquele lote |
 
 > O prompt precisa conter obrigatoriamente `{{items}}` — sem ele a requisição não tem como enviar as legendas ao modelo, e o backend recusa salvar.
+
+**O que o prompt padrão já resolve:**
+
+- **Ambiguidade nome próprio vs. substantivo comum** — decide pelo contexto da frase, não pela capitalização (ex.: "Trader" como cargo → "Comerciante"/"Operador"; "Turkey" como animal → "peru", como país → "Turquia"). Só preserva no idioma original nomes próprios de fato (pessoas, marcas).
+- **Concordância de gênero do falante** — usa pronomes e outras pistas do texto (inclusive de itens anteriores da mesma cena) para não trocar o gênero de quem fala no meio da legenda.
+
+Se sua tradução tiver esse tipo de erro (termo que deveria traduzir mas ficou no idioma original, ou gênero errado numa fala), primeiro confira se o prompt em uso é o padrão atual — clique em **Restaurar padrão** na tela de Configurações para garantir que está usando a versão mais recente.
 
 ---
 
