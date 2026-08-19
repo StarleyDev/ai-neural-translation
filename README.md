@@ -68,6 +68,8 @@ ia-translate/
 
 A tradução é feita em lotes de até 40 blocos por requisição ao modelo, preservando timestamps, formatação e ordem das falas.
 
+O modelo deve responder em JSON, mas ocasionalmente devolve quebras de linha "cruas" dentro do texto (em vez de `\n` escapado) ou trunca a resposta em lotes muito grandes — ambos casos inválidos em JSON puro. O backend ([`base.js`](src/services/providers/base.js)) tenta o parse normal primeiro e, se falhar, tenta novamente escapando caracteres de controle soltos dentro das strings antes de desistir e reportar erro; o `max_tokens` do Anthropic também foi ampliado para reduzir truncamento em lotes grandes.
+
 ---
 
 ## 🚀 Como rodar

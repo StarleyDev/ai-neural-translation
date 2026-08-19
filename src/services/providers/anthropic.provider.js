@@ -3,24 +3,21 @@
 const Anthropic = require("@anthropic-ai/sdk");
 const { buildPrompt, extractJsonArray, mapResults } = require("./base");
 
-class AnthropicProvider
-{
-    constructor({ apiKey, model, promptTemplate })
-    {
+class AnthropicProvider {
+    constructor({ apiKey, model, promptTemplate }) {
         this.client = new Anthropic({ apiKey });
         this.model = model;
         this.promptTemplate = promptTemplate;
     }
 
-    async translateBatch(batch, targetLanguage, { signal } = {})
-    {
+    async translateBatch(batch, targetLanguage, { signal } = {}) {
         const payload = batch.map((b, idx) => ({ id: idx, text: b.text }));
         const prompt = buildPrompt(payload, targetLanguage, this.promptTemplate);
 
         const response = await this.client.messages.create(
             {
                 model: this.model,
-                max_tokens: 4096,
+                max_tokens: 8192,
                 messages: [{ role: "user", content: prompt }],
             },
             { signal }

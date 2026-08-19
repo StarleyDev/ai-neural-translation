@@ -1,6 +1,6 @@
 {
     "name": "ia-translate-frontend",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "description": "Frontend para o serviço de tradução de legendas .srt usando IA.",
     "scripts": {
         "start": "ng serve",
