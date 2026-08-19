@@ -15,6 +15,7 @@ type Status = 'idle' | 'uploading' | 'translating' | 'done' | 'error' | 'cancell
 })
 export class TranslateComponent {
   targetLanguage = 'pt-br';
+  removeBrackets = true;
   status = signal<Status>('idle');
   errorMessage = signal<string>('');
   downloadUrl = signal<string | null>(null);
@@ -65,6 +66,7 @@ export class TranslateComponent {
     const formData = new FormData();
     formData.append('file', this.selectedFile);
     formData.append('target', this.targetLanguage);
+    formData.append('removeBrackets', String(this.removeBrackets));
 
     this.http.post<{ jobId: string }>('/api/subtitles/translate', formData).subscribe({
       next: ({ jobId }) => this.trackJob(jobId),

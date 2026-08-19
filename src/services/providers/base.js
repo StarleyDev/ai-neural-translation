@@ -22,15 +22,22 @@ function buildPrompt(payload, targetLanguage, template) {
         .replaceAll("{{items}}", JSON.stringify(payload));
 }
 
-// Modelos às vezes respondem com quebras de linha "cruas" dentro dos valores de string
-// (em vez de \n escapado), o que é JSON inválido. Escapa caracteres de controle que
-// aparecem dentro de literais de string, sem mexer no restante da estrutura do JSON.
+// Modelos às vezes respondem com JSON quase válido: quebras de linha "cruas" dentro de
+// strings (em vez de \n escapado), ou aspas internas (ex.: uma fala citando alguém)
+// sem escapar. Essa função tenta corrigir os dois casos sem mexer no resto da estrutura:
+// - caracteres de controle soltos dentro de uma string viram \n/\r/\t escapados;
+// - uma "," encontrada dentro de uma string só é tratada como o fechamento real da
+//   string se o próximo caractere significativo for algo que faz sentido depois de um
+//   valor JSON (:, ,, }, ] ou fim do texto); caso contrário é uma aspa de conteúdo e
+//   vira \" escapada.
 function sanitizeJsonString(text) {
     let result = "";
     let insideString = false;
     let escaped = false;
 
-    for (const char of text) {
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+
         if (insideString) {
             if (escaped) {
                 result += char;
@@ -58,7 +65,18 @@ function sanitizeJsonString(text) {
             }
 
             if (char === '"') {
-                insideString = false;
+                let j = i + 1;
+                while (j < text.length && /\s/.test(text[j])) j++;
+                const next = text[j];
+                const looksLikeRealClose = next === undefined || [":", ",", "}", "]"].includes(next);
+
+                if (looksLikeRealClose) {
+                    insideString = false;
+                    result += char;
+                } else {
+                    result += '\\"';
+                }
+                continue;
             }
 
             result += char;

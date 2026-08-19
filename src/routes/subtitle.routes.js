@@ -2,7 +2,7 @@
 
 const express = require("express");
 const multer = require("multer");
-const { parseSrt, stringifySrt } = require("../utils/srt-parser");
+const { parseSrt, stringifySrt, removeBracketOnlyBlocks } = require("../utils/srt-parser");
 const TranslatorService = require("../services/translator.service");
 const { CancelledError } = require("../services/translator.service");
 const jobStore = require("../services/job-store");
@@ -54,8 +54,10 @@ router.post("/translate", handleUpload, (req, res) =>
     try
     {
         const targetLanguage = req.body.target || "pt-br";
+        const removeBrackets = req.body.removeBrackets !== "false";
         const content = req.file.buffer.toString("utf-8");
         blocks = parseSrt(content);
+        if (removeBrackets) blocks = removeBracketOnlyBlocks(blocks);
 
         if (blocks.length === 0)
         {
@@ -64,7 +66,7 @@ router.post("/translate", handleUpload, (req, res) =>
 
         const translatorService = new TranslatorService();
         const job = jobStore.create();
-        const outputName = req.file.originalname.replace(/\.srt$/i, `-${targetLanguage}.srt`);
+        const outputName = req.file.originalname.replace(/\.srt$/i, `.${targetLanguage}.srt`);
 
         console.log(`[translate:${job.id}] recebido "${req.file.originalname}" (${blocks.length} blocos) -> ${targetLanguage}`);
 

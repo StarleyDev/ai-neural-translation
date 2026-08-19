@@ -17,6 +17,11 @@
     </select>
   </label>
 
+  <label class="checkbox-field">
+    <input type="checkbox" [(ngModel)]="removeBrackets" />
+    <span>{{ i18n.t('translate.removeBrackets') }}</span>
+  </label>
+
   <button (click)="translate()" [disabled]="status() === 'uploading' || status() === 'translating'">
     {{ status() === 'uploading' || status() === 'translating' ? i18n.t('translate.buttonLoading') : i18n.t('translate.button') }}
   </button>

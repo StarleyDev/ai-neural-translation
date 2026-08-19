@@ -17,6 +17,7 @@ Envie uma legenda em outro idioma, escolha o provedor de IA e receba o `.srt` tr
 - 🔑 **Gerenciamento de credenciais** — chaves de API nunca são expostas por completo, apenas mascaradas (`sk-ant••••qQAA`)
 - 📊 **Progresso em tempo real** — barra de progresso via Server-Sent Events acompanhando a tradução lote a lote
 - ⛔ **Cancelamento** — interrompa uma tradução em andamento a qualquer momento
+- 🧹 **Remoção de anotações `[entre colchetes]`** — opcional, tira sons/idioma/tom de voz (`[música tensa]`, `[em inglês]`) da legenda antes de traduzir, preservando fala real e nomes de personagem
 - 📝 **Prompt editável** — personalize o texto enviado à IA na tela de Configurações, com um padrão definido no `.env`
 - 🌐 **Interface multilíngue** — troque entre 🇧🇷 português e 🇺🇸 inglês pelas bandeiras no header
 - 🌓 **Interface dark/futurista** em Angular, standalone components, sem dependências pesadas
@@ -68,7 +69,23 @@ ia-translate/
 
 A tradução é feita em lotes de até 40 blocos por requisição ao modelo, preservando timestamps, formatação e ordem das falas.
 
-O modelo deve responder em JSON, mas ocasionalmente devolve quebras de linha "cruas" dentro do texto (em vez de `\n` escapado) ou trunca a resposta em lotes muito grandes — ambos casos inválidos em JSON puro. O backend ([`base.js`](src/services/providers/base.js)) tenta o parse normal primeiro e, se falhar, tenta novamente escapando caracteres de controle soltos dentro das strings antes de desistir e reportar erro; o `max_tokens` do Anthropic também foi ampliado para reduzir truncamento em lotes grandes.
+O modelo deve responder em JSON, mas ocasionalmente devolve quebras de linha "cruas" ou aspas internas não escapadas dentro do texto (em vez de `\n`/`\"` escapado), ou trunca a resposta em lotes muito grandes — tudo isso é inválido em JSON puro. O backend ([`base.js`](src/services/providers/base.js)) tenta o parse normal primeiro e, se falhar, tenta de novo escapando caracteres de controle e aspas ambíguas dentro das strings antes de desistir e reportar erro; o `max_tokens` do Anthropic também foi ampliado para reduzir truncamento em lotes grandes.
+
+---
+
+## 🧹 Removendo anotações `[entre colchetes]`
+
+Legendas com faixa de acessibilidade (SDH) costumam incluir descrições de som, idioma e tom de voz entre colchetes — `[música tensa]`, `[em inglês]`, `[com voz trêmula]`. Na tela de **Tradução**, o checkbox **"Remover anotações [entre colchetes]"** (marcado por padrão) limpa isso antes de traduzir, economizando tokens e evitando que a IA tente "traduzir" uma anotação.
+
+A regra, aplicada linha a linha dentro de cada legenda (em [`srt-parser.js`](src/utils/srt-parser.js)):
+
+- Uma linha que é **só** anotação (ex.: `[tiros]`, `- [grunhe]`) é descartada por completo.
+- Uma anotação colada numa linha com fala real (ex.: `[em inglês] Abaixe-se!`) tem só o `[...]` removido — a fala fica: `Abaixe-se!`.
+- **Nome de personagem é preservado**, não removido: `[Angie]`, `[John Smith]` continuam na legenda. A heurística considera nome quando o conteúdo do colchete tem no máximo 3 palavras, todas capitalizadas e sem dígito — `[Policial 2]` ou `[tripulante 1]`, por exemplo, são tratados como rótulo genérico (removidos), não como nome.
+- Anotações quebradas em duas linhas pelo arquivo original (`[empresário\nfala indistintamente]`, ou usando `\N` literal, comum em legendas exportadas de `.ass`/`.ssa`) também são reconhecidas e removidas por inteiro.
+- Um bloco cujas linhas ficam todas vazias depois da limpeza é removido inteiro do `.srt` final.
+
+Se preferir manter tudo como está no arquivo original, é só desmarcar o checkbox antes de enviar.
 
 ---
 
