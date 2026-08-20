@@ -13,6 +13,8 @@ export interface ProviderInfo {
   models: ProviderModel[];
   hasApiKey: boolean;
   apiKeyMasked: string | null;
+  apiKeyOptional: boolean;
+  requiresBaseUrl: boolean;
 }
 
 export interface AppSettings {
@@ -23,6 +25,12 @@ export interface AppSettings {
   promptTemplate: string;
   isDefaultPromptTemplate: boolean;
   defaultPromptTemplate: string;
+  customBaseUrl: string | null;
+  batchSize: number;
+  isDefaultBatchSize: boolean;
+  defaultBatchSize: number;
+  minBatchSize: number;
+  maxBatchSize: number;
 }
 
 export interface UpdateSettingsPayload {
@@ -31,6 +39,9 @@ export interface UpdateSettingsPayload {
   apiKey?: string;
   promptTemplate?: string;
   resetPromptTemplate?: boolean;
+  baseUrl?: string;
+  batchSize?: number;
+  resetBatchSize?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

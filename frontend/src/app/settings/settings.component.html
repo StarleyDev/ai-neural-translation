@@ -16,19 +16,41 @@
 
       <label class="field">
         <span>{{ i18n.t('settings.model') }}</span>
-        <select [(ngModel)]="selectedModel">
-          @for (m of currentProviderInfo?.models; track m.id) {
-            <option [value]="m.id">{{ m.name }}</option>
-          }
-        </select>
+        @if (currentProviderInfo && currentProviderInfo.models.length > 0) {
+          <select [(ngModel)]="selectedModel">
+            @for (m of currentProviderInfo.models; track m.id) {
+              <option [value]="m.id">{{ m.name }}</option>
+            }
+          </select>
+        } @else {
+          <input
+            type="text"
+            [(ngModel)]="selectedModel"
+            [placeholder]="i18n.t('settings.model.customPlaceholder')"
+          />
+        }
       </label>
     </div>
+
+    @if (currentProviderInfo?.requiresBaseUrl) {
+      <label class="field">
+        <span>{{ i18n.t('settings.baseUrl') }}</span>
+        <input
+          type="text"
+          [(ngModel)]="baseUrlInput"
+          [placeholder]="i18n.t('settings.baseUrl.placeholder')"
+        />
+      </label>
+      <p class="prompt-hint">{{ i18n.t('settings.baseUrl.hint') }}</p>
+    }
 
     <label class="field">
       <span>
         {{ i18n.t('settings.apiKey') }}
         @if (currentProviderInfo?.hasApiKey) {
           <span class="badge">{{ i18n.t('settings.apiKey.configured', { value: currentProviderInfo?.apiKeyMasked || '' }) }}</span>
+        } @else if (currentProviderInfo?.apiKeyOptional) {
+          <span class="badge">{{ i18n.t('settings.apiKey.optional') }}</span>
         } @else {
           <span class="badge badge-warn">{{ i18n.t('settings.apiKey.missing') }}</span>
         }
@@ -49,6 +71,43 @@
     @if (saved()) {
       <p class="success">{{ i18n.t('settings.saved') }}</p>
     }
+
+    <div class="prompt-section">
+      <label class="field">
+        <span>
+          {{ i18n.t('settings.batchSize.title') }}
+          @if (settings()!.isDefaultBatchSize) {
+            <span class="badge">{{ i18n.t('settings.batchSize.default', { value: settings()!.defaultBatchSize }) }}</span>
+          } @else {
+            <span class="badge badge-accent">{{ i18n.t('settings.prompt.custom') }}</span>
+          }
+        </span>
+        <input
+          type="number"
+          [(ngModel)]="batchSizeInput"
+          [min]="settings()!.minBatchSize"
+          [max]="settings()!.maxBatchSize"
+          step="1"
+        />
+      </label>
+      <p class="prompt-hint">{{ i18n.t('settings.batchSize.hint') }}</p>
+
+      <div class="prompt-actions">
+        <button class="secondary" (click)="resetBatchSize()" [disabled]="savingBatchSize()">
+          {{ i18n.t('settings.batchSize.reset') }}
+        </button>
+        <button (click)="saveBatchSize()" [disabled]="savingBatchSize()">
+          {{ savingBatchSize() ? i18n.t('settings.saving') : i18n.t('settings.batchSize.save') }}
+        </button>
+      </div>
+
+      @if (batchSizeSaved()) {
+        <p class="success">{{ i18n.t('settings.batchSize.saved') }}</p>
+      }
+      @if (batchSizeError()) {
+        <p class="error">{{ batchSizeError() }}</p>
+      }
+    </div>
 
     <div class="prompt-section">
       <label class="field">

@@ -11,9 +11,9 @@
   <label class="field">
     <span>{{ i18n.t('translate.targetLanguage') }}</span>
     <select [(ngModel)]="targetLanguage">
-      <option value="pt-br">Português (Brasil)</option>
-      <option value="en">Inglês</option>
-      <option value="es">Espanhol</option>
+      @for (lang of languages; track lang.code) {
+        <option [value]="lang.code">{{ lang.label }}</option>
+      }
     </select>
   </label>
 

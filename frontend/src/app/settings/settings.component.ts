@@ -18,6 +18,7 @@ export class SettingsComponent implements OnInit {
   selectedProvider = signal<string>('');
   selectedModel = signal<string>('');
   apiKeyInput = '';
+  baseUrlInput = '';
   saving = signal(false);
   saved = signal(false);
   error = signal<string>('');
@@ -26,6 +27,11 @@ export class SettingsComponent implements OnInit {
   savingPrompt = signal(false);
   promptSaved = signal(false);
   promptError = signal<string>('');
+
+  batchSizeInput = 40;
+  savingBatchSize = signal(false);
+  batchSizeSaved = signal(false);
+  batchSizeError = signal<string>('');
 
   constructor(
     private readonly settingsService: SettingsService,
@@ -43,6 +49,8 @@ export class SettingsComponent implements OnInit {
         this.selectedProvider.set(data.provider);
         this.selectedModel.set(data.model);
         this.promptDraft = data.promptTemplate;
+        this.baseUrlInput = data.customBaseUrl || '';
+        this.batchSizeInput = data.batchSize;
       },
       error: (err) =>
         this.error.set(err.error?.error || 'Não foi possível carregar as configurações.'),
@@ -68,12 +76,15 @@ export class SettingsComponent implements OnInit {
     this.saved.set(false);
     this.error.set('');
 
-    const payload: { provider: string; model: string; apiKey?: string } = {
+    const payload: { provider: string; model: string; apiKey?: string; baseUrl?: string } = {
       provider: this.selectedProvider(),
       model: this.selectedModel(),
     };
     if (this.apiKeyInput.trim()) {
       payload.apiKey = this.apiKeyInput.trim();
+    }
+    if (this.currentProviderInfo?.requiresBaseUrl) {
+      payload.baseUrl = this.baseUrlInput.trim();
     }
 
     this.settingsService.update(payload).subscribe({
@@ -124,6 +135,44 @@ export class SettingsComponent implements OnInit {
       error: (err) => {
         this.promptError.set(err.error?.error || 'Falha ao restaurar o prompt.');
         this.savingPrompt.set(false);
+      },
+    });
+  }
+
+  saveBatchSize(): void {
+    this.savingBatchSize.set(true);
+    this.batchSizeSaved.set(false);
+    this.batchSizeError.set('');
+
+    this.settingsService.update({ batchSize: this.batchSizeInput }).subscribe({
+      next: (data) => {
+        this.settings.set(data);
+        this.batchSizeInput = data.batchSize;
+        this.savingBatchSize.set(false);
+        this.batchSizeSaved.set(true);
+      },
+      error: (err) => {
+        this.batchSizeError.set(err.error?.error || 'Falha ao salvar o tamanho do lote.');
+        this.savingBatchSize.set(false);
+      },
+    });
+  }
+
+  resetBatchSize(): void {
+    this.savingBatchSize.set(true);
+    this.batchSizeSaved.set(false);
+    this.batchSizeError.set('');
+
+    this.settingsService.update({ resetBatchSize: true }).subscribe({
+      next: (data) => {
+        this.settings.set(data);
+        this.batchSizeInput = data.batchSize;
+        this.savingBatchSize.set(false);
+        this.batchSizeSaved.set(true);
+      },
+      error: (err) => {
+        this.batchSizeError.set(err.error?.error || 'Falha ao restaurar o tamanho do lote.');
+        this.savingBatchSize.set(false);
       },
     });
   }

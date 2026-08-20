@@ -59,6 +59,19 @@ const PROVIDERS = {
         defaultModel: "gemini-3.5-flash",
         envVar: "GOOGLE_API_KEY",
     },
+    custom: {
+        id: "custom",
+        name: "Custom / Self-hosted",
+        // Sem lista fixa de modelos: o usuário digita o nome do modelo (ex.: "llama3.1")
+        // e a URL do servidor (ex.: "http://localhost:11434/v1" pro Ollama).
+        // Qualquer servidor compatível com a API de chat completions da OpenAI funciona:
+        // Ollama, LM Studio, vLLM, LocalAI, text-generation-webui, etc.
+        models: [],
+        defaultModel: "",
+        envVar: "CUSTOM_API_KEY",
+        requiresBaseUrl: true,
+        apiKeyOptional: true,
+    },
 };
 
 module.exports = { PROVIDERS };

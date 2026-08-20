@@ -6,6 +6,47 @@ import { I18nService } from '../services/i18n.service';
 
 type Status = 'idle' | 'uploading' | 'translating' | 'done' | 'error' | 'cancelled';
 
+// Lista de idiomas de destino oferecida no seletor. "pt-br" fica sempre em primeiro e é
+// o padrão selecionado (targetLanguage abaixo). Os valores viram {{targetLanguage}} no
+// prompt enviado à IA — nomes por extenso funcionam melhor que códigos ISO soltos.
+export const TARGET_LANGUAGES: { code: string; label: string }[] = [
+  { code: 'pt-br', label: 'Português (Brasil)' },
+  { code: 'pt-pt', label: 'Português (Portugal)' },
+  { code: 'en', label: 'Inglês' },
+  { code: 'es', label: 'Espanhol' },
+  { code: 'fr', label: 'Francês' },
+  { code: 'de', label: 'Alemão' },
+  { code: 'it', label: 'Italiano' },
+  { code: 'nl', label: 'Holandês' },
+  { code: 'ru', label: 'Russo' },
+  { code: 'pl', label: 'Polonês' },
+  { code: 'sv', label: 'Sueco' },
+  { code: 'no', label: 'Norueguês' },
+  { code: 'da', label: 'Dinamarquês' },
+  { code: 'fi', label: 'Finlandês' },
+  { code: 'el', label: 'Grego' },
+  { code: 'tr', label: 'Turco' },
+  { code: 'uk', label: 'Ucraniano' },
+  { code: 'cs', label: 'Tcheco' },
+  { code: 'ro', label: 'Romeno' },
+  { code: 'hu', label: 'Húngaro' },
+  { code: 'he', label: 'Hebraico' },
+  { code: 'ar', label: 'Árabe' },
+  { code: 'fa', label: 'Persa' },
+  { code: 'hi', label: 'Hindi' },
+  { code: 'bn', label: 'Bengali' },
+  { code: 'ur', label: 'Urdu' },
+  { code: 'th', label: 'Tailandês' },
+  { code: 'vi', label: 'Vietnamita' },
+  { code: 'id', label: 'Indonésio' },
+  { code: 'ms', label: 'Malaio' },
+  { code: 'tl', label: 'Filipino (Tagalo)' },
+  { code: 'zh-Hans', label: 'Chinês (Simplificado)' },
+  { code: 'zh-Hant', label: 'Chinês (Tradicional)' },
+  { code: 'ja', label: 'Japonês' },
+  { code: 'ko', label: 'Coreano' },
+];
+
 @Component({
   selector: 'app-translate',
   standalone: true,
@@ -14,7 +55,8 @@ type Status = 'idle' | 'uploading' | 'translating' | 'done' | 'error' | 'cancell
   styleUrl: './translate.component.css',
 })
 export class TranslateComponent {
-  targetLanguage = 'pt-br';
+  readonly languages = TARGET_LANGUAGES;
+  targetLanguage = TARGET_LANGUAGES[0].code;
   removeBrackets = true;
   status = signal<Status>('idle');
   errorMessage = signal<string>('');
