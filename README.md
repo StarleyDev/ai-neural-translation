@@ -14,8 +14,11 @@ Envie uma legenda em outro idioma, escolha o provedor de IA e receba o `.srt` tr
 
 - 📤 **Upload de `.srt`** com validação de extensão, MIME type e estrutura do arquivo
 - 🤖 **Múltiplos provedores de IA** — troque entre Anthropic (Claude), OpenAI e Google (Gemini) direto pela tela de Configurações
+- 🏠 **IA local / self-hosted** — aponte para qualquer servidor compatível com a API da OpenAI (Ollama, LM Studio, vLLM, LocalAI) e rode tudo na sua máquina, sem chave de API
+- 🌎 **34 idiomas de destino** — do português (padrão) ao japonês, com detecção de formato preservada
 - 🔑 **Gerenciamento de credenciais** — chaves de API nunca são expostas por completo, apenas mascaradas (`sk-ant••••qQAA`)
 - 📊 **Progresso em tempo real** — barra de progresso via Server-Sent Events acompanhando a tradução lote a lote
+- ⚙️ **Tamanho de lote configurável** — quantas legendas vão por requisição, ajustável ao que o seu modelo aguenta
 - ⛔ **Cancelamento** — interrompa uma tradução em andamento a qualquer momento
 - 🧹 **Remoção de anotações `[entre colchetes]`** — opcional, tira sons/idioma/tom de voz (`[música tensa]`, `[em inglês]`) da legenda antes de traduzir, preservando fala real e nomes de personagem
 - 📝 **Prompt editável** — personalize o texto enviado à IA na tela de Configurações, com um padrão definido no `.env`
@@ -45,7 +48,12 @@ ia-translate/
 │   │   ├── translator.service.js # Orquestra tradução em lotes
 │   │   ├── job-store.js          # Jobs assíncronos em memória
 │   │   ├── session.store.js      # Sessões de login em memória (token -> usuário)
-│   │   └── providers/            # Implementações por provedor (Anthropic/OpenAI/Google)
+│   │   └── providers/            # Um arquivo por provedor + base.js (prompt e parsing)
+│   │       ├── base.js           # Prompt, schema da resposta e extração resiliente do JSON
+│   │       ├── anthropic.provider.js
+│   │       ├── openai.provider.js
+│   │       ├── google.provider.js
+│   │       └── custom.provider.js  # Servidor próprio compatível com a API da OpenAI
 │   └── utils/srt-parser.js       # Parse e serialização de .srt
 │
 └── frontend/                     # Angular (standalone, sem Router)
@@ -67,9 +75,17 @@ ia-translate/
 3. O frontend abre uma conexão **SSE** (`GET /api/subtitles/translate/:jobId/events`) e recebe atualizações de progresso lote a lote.
 4. Ao concluir, o arquivo fica disponível em `GET /api/subtitles/translate/:jobId/download`.
 
-A tradução é feita em lotes de até 40 blocos por requisição ao modelo, preservando timestamps, formatação e ordem das falas.
+A tradução é feita em lotes (40 blocos por padrão, [configurável](#-tamanho-do-lote)) por requisição ao modelo, preservando timestamps, formatação e ordem das falas.
 
-O modelo deve responder em JSON, mas ocasionalmente devolve quebras de linha "cruas" ou aspas internas não escapadas dentro do texto (em vez de `\n`/`\"` escapado), ou trunca a resposta em lotes muito grandes — tudo isso é inválido em JSON puro. O backend ([`base.js`](src/services/providers/base.js)) tenta o parse normal primeiro e, se falhar, tenta de novo escapando caracteres de controle e aspas ambíguas dentro das strings antes de desistir e reportar erro; o `max_tokens` do Anthropic também foi ampliado para reduzir truncamento em lotes grandes.
+### Lidando com JSON malformado
+
+O modelo precisa responder num JSON com um item por legenda. Provedores em nuvem cumprem isso de forma consistente, mas **modelos locais menores erram a sintaxe com frequência** — trocam `:` por `,`, esquecem de fechar chaves, intercalam comentários no meio da estrutura. Duas defesas:
+
+**1. Restrição na geração (preventiva).** Para o provedor customizado, a requisição envia um JSON Schema em `response_format`. Servidores que suportam *structured outputs* usam isso para **grammar-constrained decoding**: o modelo fica impedido de emitir qualquer token que quebre o JSON. Se o servidor não suportar, há fallback automático (`json_schema` → `json_object` → sem restrição), detectado na primeira requisição e reaproveitado nas seguintes.
+
+**2. Recuperação no parsing (corretiva).** Se ainda assim vier algo inválido, o [`base.js`](src/services/providers/base.js) tenta reparos progressivos: escapes inválidos, caracteres de controle crus, aspas internas não escapadas, `)` no lugar de `}`, vírgulas faltando ou sobrando, chave ou `]` não fechados. Em último caso, extrai os objetos individualmente íntegros e descarta só os corrompidos — melhor perder uma legenda que o lote inteiro. Legendas não traduzidas mantêm o texto original no arquivo final.
+
+> Respostas já válidas (o caso normal em nuvem) retornam na primeira tentativa de parse, sem passar por nenhuma dessas transformações.
 
 ---
 
@@ -168,19 +184,72 @@ Nenhuma das duas operações derruba a sessão atual — não é necessário log
 
 Pela tela **Configurações** você pode, a qualquer momento:
 
-- Trocar o provedor de IA (Anthropic, OpenAI, Google)
+- Trocar o provedor de IA (Anthropic, OpenAI, Google ou um servidor próprio)
 - Escolher o modelo dentro do provedor selecionado
 - Colar uma nova chave de API — a chave anterior nunca é exibida por completo, apenas mascarada
 
 Se nenhuma chave for salva pela interface, o backend usa como fallback as variáveis de ambiente:
 
-| Variável            | Provedor  |
-| ------------------- | --------- |
-| `ANTHROPIC_API_KEY` | Anthropic |
-| `OPENAI_API_KEY`    | OpenAI    |
-| `GOOGLE_API_KEY`    | Google    |
+| Variável            | Provedor            |
+| ------------------- | ------------------- |
+| `ANTHROPIC_API_KEY` | Anthropic           |
+| `OPENAI_API_KEY`    | OpenAI              |
+| `GOOGLE_API_KEY`    | Google              |
+| `CUSTOM_API_KEY`    | Custom (opcional)   |
+| `CUSTOM_BASE_URL`   | Custom (URL do servidor) |
 
 O catálogo de modelos de cada provedor (em [`providers.js`](src/config/providers.js)) é curado manualmente e reflete os modelos disponíveis nas respectivas APIs — hoje **6** modelos Anthropic, **20** OpenAI (incluindo a série de raciocínio `o1`/`o3`/`o4-mini`) e **8** Google (Gemini). Como os provedores lançam e aposentam modelos com frequência, essa lista pode ficar desatualizada com o tempo — se notar um modelo faltando ou descontinuado, é só editar esse arquivo.
+
+---
+
+## 🏠 Usando IA local (self-hosted)
+
+Escolha **Custom / Self-hosted** como provedor para apontar o app a qualquer servidor que fale a API de chat completions da OpenAI — [Ollama](https://ollama.com), [LM Studio](https://lmstudio.ai), vLLM, LocalAI, text-generation-webui.
+
+Diferente dos provedores em nuvem, aqui não há lista fixa de modelos: você informa
+
+- **URL do servidor** — ex.: `http://localhost:11434/v1` no Ollama
+- **Modelo** — o nome exato instalado no seu servidor, ex.: `qwen2.5:7b-instruct`
+- **Chave de API** — opcional; a maioria dos servidores locais dispensa
+
+Exemplo com Ollama:
+
+```bash
+ollama pull qwen2.5:7b-instruct
+ollama serve
+```
+
+Depois, em **Configurações**: provedor `Custom / Self-hosted`, URL `http://localhost:11434/v1`, modelo `qwen2.5:7b-instruct`.
+
+### Escolhendo o modelo
+
+Modelos com **modo de raciocínio** (Qwen3, smallthinker, DeepSeek-R1) funcionam, mas são ordens de magnitude mais lentos: geram centenas de tokens "pensando" antes de cada resposta, e essa fase consome a janela de contexto — o que pode truncar a tradução no meio. Para traduzir legendas, **modelos instruct sem raciocínio rendem muito melhor**.
+
+Se as respostas vierem cortadas, o contexto do modelo provavelmente está curto. O padrão do Ollama é bem menor que o suportado pelo modelo:
+
+```bash
+# Modelfile
+FROM qwen2.5:7b-instruct
+PARAMETER num_ctx 16384
+```
+```bash
+ollama create qwen2.5-16k -f Modelfile
+```
+
+Outra saída é reduzir o [tamanho do lote](#-tamanho-do-lote).
+
+---
+
+## ⚙️ Tamanho do lote
+
+Define quantas legendas vão numa mesma requisição ao modelo. Configurável em **Configurações**, com padrão automático conforme o provedor:
+
+| Provedor | Padrão |
+| --- | --- |
+| Anthropic, OpenAI, Google | 40 |
+| Custom / Self-hosted | 5 |
+
+Lotes maiores são mais rápidos (menos requisições) e dão mais contexto ao modelo, o que ajuda na coerência entre falas próximas. Lotes menores são mais seguros com modelos pequenos, que perdem a estrutura da resposta em respostas longas. O botão **Restaurar padrão** volta ao valor recomendado para o provedor ativo.
 
 ---
 
@@ -212,7 +281,9 @@ Se sua tradução tiver esse tipo de erro (termo que deveria traduzir mas ficou 
 
 ## 🌐 Idioma da interface
 
-O header tem duas bandeiras (🇧🇷 / 🇺🇸) para alternar o idioma dos textos da interface entre português e inglês. A escolha fica salva no navegador (`localStorage`) e não afeta o **idioma de destino da tradução**, que é selecionado separadamente na tela de Tradução.
+O header tem duas bandeiras (🇧🇷 / 🇺🇸) para alternar o idioma dos textos da interface entre português e inglês. A escolha fica salva no navegador (`localStorage`).
+
+Isso é independente do **idioma de destino da tradução**, escolhido na tela de Tradução entre **34 opções** — de português (padrão) e espanhol a japonês, coreano, árabe e hindi. A lista fica em [`translate.component.ts`](frontend/src/app/translate/translate.component.ts) e é simples de estender.
 
 ---
 
